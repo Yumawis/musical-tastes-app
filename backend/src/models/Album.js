@@ -3,14 +3,16 @@ const mongoose = require("mongoose");
 const albumSchema = new mongoose.Schema(
   {
     title: { type: String, trim: true, required: true, unique: true },
-    releaseDate: Date,
+    releaseDate: { type: Date, require: true },
     coverImage: String,
-    artist: {
+    artistId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Artist",
       required: true,
     },
-    tracklist: [{ type: mongoose.Schema.Types.ObjectId, ref: "Song" }],
+    tracklist: [
+      { type: mongoose.Schema.Types.ObjectId, ref: "Song", require: false },
+    ],
   },
   { timestamps: true }
 );

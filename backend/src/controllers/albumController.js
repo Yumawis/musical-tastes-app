@@ -1,5 +1,6 @@
 const Album = require("../models/Album");
 const Artist = require("../models/Artist");
+
 const { validateAlbumData } = require("../validators/albumValidator");
 
 // 👉 Crear álbum
@@ -7,10 +8,10 @@ const createAlbum = async (req, res) => {
   try {
     console.log("💿 Creando nuevo álbum...");
 
-    const { title, releaseDate, coverImage, artist, tracklist } = req.body;
+    const { title, releaseDate, coverImage, artistId, tracklist } = req.body;
 
     // 🧩 Validación
-    const validationError = validateAlbumData({ artist, title });
+    const validationError = validateAlbumData({ artistId, title });
 
     if (validationError) {
       return res.status(400).json({
@@ -21,7 +22,7 @@ const createAlbum = async (req, res) => {
     }
 
     // ⚠️ Verificar que exista el artista
-    const existingArtist = await Artist.findById(artist);
+    const existingArtist = await Artist.findById(artistId);
 
     if (!existingArtist) {
       return res.status(422).json({
@@ -32,7 +33,7 @@ const createAlbum = async (req, res) => {
     }
 
     // ⚠️ Verificar duplicados
-    const existingAlbum = await Album.findOne({ artist, title });
+    const existingAlbum = await Album.findOne({ artistId, title });
 
     if (existingAlbum) {
       return res.status(422).json({
@@ -47,14 +48,15 @@ const createAlbum = async (req, res) => {
       title,
       releaseDate,
       coverImage,
-      artist,
+      artistId,
       tracklist,
     });
 
     const savedAlbum = await newAlbum.save();
+    console.log("✅ Albúm creado:", savedAlbum);
 
     // 🔗 Asociar el álbum al artista
-    const updatedArtist = await Artist.findByIdAndUpdate(artist, {
+    const updatedArtist = await Artist.findByIdAndUpdate(artistId, {
       $push: { album: savedAlbum._id },
     });
 
@@ -168,7 +170,9 @@ const getAlbumById = async (req, res) => {
 // 👉 Actualizar álbum
 const updateAlbum = async (req, res) => {
   try {
-    console.log(`✏️ Actualizando álbum con ID: ${req.params.id}`);
+    const { id } = req.params;
+
+    console.log(`✏️ Actualizando álbum con ID: ${id}`);
 
     const { title, artist } = req.body;
 
@@ -182,11 +186,9 @@ const updateAlbum = async (req, res) => {
     }
 
     // 💾 Actualizar el álbum
-    const updatedAlbum = await Album.findByIdAndUpdate(
-      req.params.id,
-      req.body,
-      { new: true }
-    );
+    const updatedAlbum = await Album.findByIdAndUpdate(id, req.body, {
+      new: true,
+    });
 
     if (!updatedAlbum) {
       return res.status(404).json({

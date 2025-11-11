@@ -5,7 +5,7 @@ const { validateArtistData } = require("../validators/artistValidator");
 // 👉 Crear artista
 const createArtist = async (req, res) => {
   try {
-    const { name, image, album } = req.body;
+    const { name, image, albumId } = req.body;
 
     console.log("🎨 Creando nuevo artista...");
 
@@ -30,7 +30,7 @@ const createArtist = async (req, res) => {
     }
 
     // 💾 Crear artista
-    const newArtist = new Artist({ name, image, album });
+    const newArtist = new Artist({ name, image, albumId });
     const savedArtist = await newArtist.save();
 
     console.log("✅ Artista creado:", savedArtist);
@@ -64,23 +64,24 @@ const getAllArtists = async (req, res) => {
   try {
     console.log("📋 Obteniendo lista de artistas...");
 
-    const artists = await Artist.find().populate(
-      "album",
+    const artistsId = await Artist.find().populate(
+      "albumId",
       "title releaseDate coverImage"
     );
 
-    console.log("✅ Artistas encontrados:", artists.length);
+    console.log("✅ Artistas encontrados:", artistsId.length);
 
     const response = {
       data: {
         message: "Artistas encontrados",
-        result: artists,
+        result: artistsId,
       },
     };
 
     return res.status(200).json(response);
   } catch (error) {
     const errorMessage = error.message;
+
     console.error("❌ Error obteniendo todos los artistas:", errorMessage);
 
     const response = {
@@ -98,14 +99,15 @@ const getAllArtists = async (req, res) => {
 const getArtistById = async (req, res) => {
   try {
     const { id } = req.params;
+
     console.log(`🔍 Buscando artista con ID: ${id}`);
 
-    const artist = await Artist.findById(id).populate(
-      "album",
+    const artistId = await Artist.findById(id).populate(
+      "albumId",
       "title coverImage releaseDate"
     );
 
-    if (!artist) {
+    if (!artistId) {
       return res.status(400).json({
         data: { message: "Artista no encontrado" },
       });
@@ -114,12 +116,14 @@ const getArtistById = async (req, res) => {
     const response = {
       data: {
         message: "Artista encontrado correctamente",
-        result: artist,
+        result: artistId,
       },
     };
+
     return res.status(200).json(response);
   } catch (error) {
     const errorMessage = error.message;
+
     console.error("❌ Error obteniendo el artista por ID:", errorMessage);
 
     const response = {
@@ -135,7 +139,7 @@ const getArtistById = async (req, res) => {
 // 👉 Actualizar artista
 const updateArtist = async (req, res) => {
   try {
-    console.log(`✏️ Actualizando artista con ID: ${req.params.id}`);
+    console.log(`✏️ Actualizando artista con ID: ${id}`);
 
     const { id } = req.params;
     const { name, image } = req.body;
@@ -201,9 +205,11 @@ const updateArtist = async (req, res) => {
 // 👉 Eliminar artista
 const deleteArtist = async (req, res) => {
   try {
-    console.log(`✏️ Eliminando artista con ID: ${req.params.id}`);
+    const { id } = req.params;
 
-    const deletedArtist = await Artist.findByIdAndDelete(req.params.id);
+    console.log(`✏️ Eliminando artista con ID: ${id}`);
+
+    const deletedArtist = await Artist.findByIdAndDelete(id);
 
     if (!deletedArtist) {
       return res.status(404).json({

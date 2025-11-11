@@ -19,10 +19,10 @@ const createSong = async (req, res) => {
       });
     }
 
-    const { title, artist, releaseDate, duration, album } = req.body;
+    const { title, artistId, releaseDate, duration, albumId } = req.body;
 
     // 🔎 Verificar que el artista exista
-    const artistExists = await Artist.findById(artist);
+    const artistExists = await Artist.findById(artistId);
 
     if (!artistExists) {
       return res.status(404).json({
@@ -31,7 +31,7 @@ const createSong = async (req, res) => {
     }
 
     // 🔍 Verificar duplicados por artista y título
-    const existingSong = await Song.findOne({ artist, title });
+    const existingSong = await Song.findOne({ artistId, title });
 
     if (existingSong) {
       return res.status(422).json({
@@ -44,17 +44,17 @@ const createSong = async (req, res) => {
     // 💾 Crear nueva canción
     const newSong = new Song({
       title,
-      artist,
+      artistId,
       releaseDate,
       duration,
-      album: album || null,
+      albumId: albumId || null,
     });
 
     const savedSong = await newSong.save();
 
     // Si tiene álbum, agregarla al tracklist
-    if (album) {
-      await Album.findByIdAndUpdate(album, {
+    if (albumId) {
+      await Album.findByIdAndUpdate(albumId, {
         $push: { tracklist: savedSong._id },
       });
     }
@@ -122,8 +122,8 @@ const getSongById = async (req, res) => {
     console.log(`🔍 Buscando canciones con ID: ${id}`);
 
     const song = await Song.findById(id)
-      .populate("artist", "name image")
-      .populate("album", "title coverImage releaseDate");
+      .populate("artistId", "name image")
+      .populate("albumId", "title coverImage releaseDate");
 
     if (!song) {
       return res.status(404).json({
@@ -134,7 +134,7 @@ const getSongById = async (req, res) => {
     const response = {
       data: {
         message: "Canción encontrada correctamente",
-        result: album,
+        result: song,
       },
     };
 
@@ -224,10 +224,11 @@ const deleteSong = async (req, res) => {
     }
 
     // 💿 Si la canción pertenece a un álbum, eliminarla del tracklist
-    if (song.album) {
-      await Album.findByIdAndUpdate(song.album, {
+    if (song.albumId) {
+      await Album.findByIdAndUpdate(song.albumId, {
         $pull: { tracklist: song._id },
       });
+
       console.log("🧹 Canción removida del tracklist del álbum");
     }
 
@@ -243,6 +244,7 @@ const deleteSong = async (req, res) => {
     return res.status(200).json(response);
   } catch (error) {
     const errorMessage = error.message;
+
     console.error("❌ Error eliminando la canción:", errorMessage);
 
     const response = {
