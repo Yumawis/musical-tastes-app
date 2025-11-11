@@ -1,5 +1,4 @@
 const Artist = require("../models/Artist");
-const Album = require("../models/Album");
 const { validateArtistData } = require("../validators/artistValidator");
 
 // 👉 Crear artista
@@ -21,17 +20,17 @@ const createArtist = async (req, res) => {
     }
 
     // 🔍 Verificar duplicado
-    const existingArtist = await Artist.findOne({ name });
+    const existingArtistId = await Artist.findOne({ name });
 
-    if (existingArtist) {
+    if (existingArtistId) {
       return res.status(422).json({
         data: { message: "Ya existe un artista con ese nombre" },
       });
     }
 
     // 💾 Crear artista
-    const newArtist = new Artist({ name, image, albumId });
-    const savedArtist = await newArtist.save();
+    const newArtistId = new Artist({ name, image, albumId });
+    const savedArtist = await newArtistId.save();
 
     console.log("✅ Artista creado:", savedArtist);
 
@@ -60,7 +59,7 @@ const createArtist = async (req, res) => {
 };
 
 // 👉 Obtener todos los artistas
-const getAllArtists = async (req, res) => {
+const getAllArtistsId = async (req, res) => {
   try {
     console.log("📋 Obteniendo lista de artistas...");
 
@@ -137,7 +136,7 @@ const getArtistById = async (req, res) => {
 };
 
 // 👉 Actualizar artista
-const updateArtist = async (req, res) => {
+const updateArtistId = async (req, res) => {
   try {
     console.log(`✏️ Actualizando artista con ID: ${id}`);
 
@@ -209,9 +208,10 @@ const deleteArtist = async (req, res) => {
 
     console.log(`✏️ Eliminando artista con ID: ${id}`);
 
-    const deletedArtist = await Artist.findByIdAndDelete(id);
+    // 🟢 Buscar el artista primero
+    const artist = await Artist.findById(id);
 
-    if (!deletedArtist) {
+    if (!artist) {
       return res.status(404).json({
         data: {
           message: "El artista no existe o ya fue eliminado",
@@ -219,9 +219,14 @@ const deleteArtist = async (req, res) => {
       });
     }
 
+    // 🗑️ Eliminar el artista (esto activará el middleware pre("deleteOne"))
+    await artist.deleteOne();
+
+    // ✅ Respuesta al cliente
     const response = {
       data: {
-        message: "Artista eliminado correctamente",
+        message:
+          "Artista eliminado correctamente junto con sus álbumes relacionados",
       },
     };
 
@@ -244,8 +249,8 @@ const deleteArtist = async (req, res) => {
 
 module.exports = {
   createArtist,
-  getAllArtists,
+  getAllArtistsId,
   getArtistById,
-  updateArtist,
+  updateArtistId,
   deleteArtist,
 };

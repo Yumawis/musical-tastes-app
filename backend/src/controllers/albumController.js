@@ -55,21 +55,10 @@ const createAlbum = async (req, res) => {
     const savedAlbum = await newAlbum.save();
     console.log("✅ Albúm creado:", savedAlbum);
 
-    // 🔗 Asociar el álbum al artista
-    const updatedArtist = await Artist.findByIdAndUpdate(artistId, {
-      $push: { album: savedAlbum._id },
-    });
-
-    if (!updatedArtist) {
-      return res.status(400).json({
-        data: { message: "Error al asignarle un album al artista" },
-      });
-    }
-
     const response = {
       data: {
         message: "Álbum creado exitosamente",
-        albumID: savedAlbum,
+        albumID: savedAlbum._id,
       },
     };
 
@@ -95,7 +84,7 @@ const getAllAlbums = async (req, res) => {
     console.log("🎵 Obteniendo todos los álbumes...");
 
     const albums = await Album.find()
-      .populate("artist", "name image")
+      .populate("artistId", "name image")
       .populate("tracklist", "title duration");
 
     if (albums.length === 0) {
@@ -114,11 +103,11 @@ const getAllAlbums = async (req, res) => {
     return res.status(200).json(response);
   } catch (error) {
     const errorMessage = error.message;
-    console.error("❌ Error al obtener los álbumes:", errorMessage);
+    console.error("❌ Error interno al obtener los álbumes:", errorMessage);
 
     const response = {
       data: {
-        message: "Error interno al obtener los álbumes",
+        message: "Error al obtener los álbumes",
         error: errorMessage,
       },
     };
@@ -135,7 +124,7 @@ const getAlbumById = async (req, res) => {
     console.log(`🔍 Buscando álbum con ID: ${id}`);
 
     const album = await Album.findById(id)
-      .populate("artist", "name image")
+      .populate("artistId", "name image")
       .populate("tracklist", "title duration releaseDate");
 
     if (!album) {
@@ -170,14 +159,13 @@ const getAlbumById = async (req, res) => {
 // 👉 Actualizar álbum
 const updateAlbum = async (req, res) => {
   try {
-    const { id } = req.params;
-
     console.log(`✏️ Actualizando álbum con ID: ${id}`);
 
+    const { id } = req.params;
     const { title, artist } = req.body;
 
     // 🧩 Validación de datos
-    const validationError = validateAlbumData({ title, artist });
+    const validationError = validateAlbumData({ title, artistId });
 
     if (validationError) {
       return res.status(400).json({
@@ -222,19 +210,26 @@ const updateAlbum = async (req, res) => {
 // 👉 Eliminar álbum
 const deleteAlbum = async (req, res) => {
   try {
-    console.log(`✏️ Eliminando artista con ID: ${req.params.id}`);
+    const { id } = req.params;
+    console.log(`✏️ Eliminando artista con ID: ${id}`);
 
-    const deletedAlbum = await Album.findByIdAndDelete(req.params.id);
+    const album = await Album.findById(id);
 
-    if (!deletedAlbum) {
+    if (!album) {
       return res.status(404).json({
-        data: { message: "El álbum no existe o ya fue eliminado" },
+        data: {
+          message: "El álbum no existe o ya fue eliminado",
+        },
       });
     }
 
+    await album.deleteOne();
+
+    console.log(`✅ Álbum eliminado correctamente`);
+
     const response = {
       data: {
-        message: "Álbum eliminado correctamente",
+        message: "Álbum eliminado correctamente y desvinculado al artista",
       },
     };
 

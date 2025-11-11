@@ -9,6 +9,7 @@ const connectDB = require("./config/db");
 const artistRoutes = require("./routes/artistRoutes");
 const albumRoutes = require("./routes/albumRoutes");
 const songRoutes = require("./routes/songRoutes");
+const userRoutes = require("./routes/userRoutes");
 
 // 🏗️ Initialize the Express application
 const app = express();
@@ -32,6 +33,7 @@ const prefix = "/api/v1/musical-tastes";
 app.use(`${prefix}/artist`, artistRoutes);
 app.use(`${prefix}/album`, albumRoutes);
 app.use(`${prefix}/song`, songRoutes);
+app.use(`${prefix}/user`, userRoutes);
 
 // ⚙️ Start the server
 app.listen(process.env.PORT, () => {

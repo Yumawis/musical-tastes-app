@@ -1,24 +1,27 @@
-const express = require('express')
-const router = express.Router()
-const { createArtist,
-    getAllArtists,
-    getArtistById,
-    updateArtist,
-    deleteArtist} = require("../controllers/artistController")
+const express = require("express");
+const router = express.Router();
+
+const {
+  createArtist,
+  getAllArtistsId,
+  getArtistById,
+  updateArtistId,
+  deleteArtist,
+} = require("../controllers/artistController");
 
 // 👉 Crear artista
-router.post('/', createArtist)
+router.post("/", createArtist);
 
 // 👉 Obtener todos los artistas
-router.get('/', getAllArtists)
+router.get("/", getAllArtistsId);
 
 // 👉 Obtener un solo artista
-router.get('/:id', getArtistById)
+router.get("/:id", getArtistById);
 
 // 👉 Actualizar artista
-router.put('/:id', updateArtist)
+router.put("/:id", updateArtistId);
 
 // 👉 Eliminar artista
-router.delete('/:id', deleteArtist)
+router.delete("/:id", deleteArtist);
 
-module.exports = router
+module.exports = router;
