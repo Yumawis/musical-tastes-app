@@ -2,7 +2,7 @@ const User = require("../models/User");
 
 const createUser = async (req, res) => {
   try {
-    const { names, lastnames, email, rol } = req.body;
+    const { names, lastnames, email, password, rol } = req.body;
 
     console.log("Creando nuevo usuario...");
 
@@ -20,6 +20,7 @@ const createUser = async (req, res) => {
       names,
       lastnames,
       email,
+      password,
       rol: rol || "CLIENT",
     });
 
@@ -27,7 +28,7 @@ const createUser = async (req, res) => {
 
     const response = {
       data: {
-        message: "Usuario creado exitosamente",
+        message: "Usuario registrado exitosamente",
         result: user._id,
       },
     };
@@ -35,6 +36,7 @@ const createUser = async (req, res) => {
     return res.status(200).json(response);
   } catch (error) {
     const errorMessage = error.message;
+
     console.error("❌ Error al crear el usuario", errorMessage);
 
     const response = {
@@ -51,10 +53,11 @@ const createUser = async (req, res) => {
 // 👉 Iniciar sesión básico
 const loginUser = async (req, res) => {
   try {
-    const { email } = req.body;
+    const { email, password } = req.body;
 
-    console.log("Iniciando sesión de usario...");
+    console.log("🔐 Iniciando sesión de usario...");
 
+    // 1️⃣ Buscar al usuario por su email
     const user = await User.findOne({ email });
 
     if (!user) {
@@ -65,10 +68,27 @@ const loginUser = async (req, res) => {
       });
     }
 
+    // 2️⃣ Verificar la contraseña usando bcrypt
+    const isMatch = await user.checkPassword(password);
+
+    if (!isMatch) {
+      return res.status(400).json({
+        data: {
+          message: "Contraseña incorrecta",
+        },
+      });
+    }
+
+    // 3️⃣ Si es correcta, devuelves info del usuario
     const response = {
       data: {
-        message: "Inicio de sesión exitoso",
-        result: user,
+        message: "Inicio de sesión exitoso ✅",
+        result: {
+          id: user._id,
+          names: user.names,
+          email: user.email,
+          rol: user.rol,
+        },
       },
     };
 

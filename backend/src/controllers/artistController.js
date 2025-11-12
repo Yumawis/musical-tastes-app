@@ -63,10 +63,9 @@ const getAllArtistsId = async (req, res) => {
   try {
     console.log("📋 Obteniendo lista de artistas...");
 
-    const artistsId = await Artist.find().populate(
-      "albumId",
-      "title releaseDate coverImage"
-    );
+    const artistsId = await Artist.find()
+      .populate("albumId", "title releaseDate coverImage")
+      .populate("songId", "title duration");
 
     console.log("✅ Artistas encontrados:", artistsId.length);
 

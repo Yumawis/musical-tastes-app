@@ -87,8 +87,8 @@ const createSong = async (req, res) => {
 const getAllSong = async (req, res) => {
   try {
     const songs = await Song.find()
-      .populate("artist", "name")
-      .populate("album", "title coverImage releaseDate");
+      .populate("artistId", "name")
+      .populate("albumId", "title coverImage releaseDate");
 
     console.log("✅ Canciones encontradas:", songs.length);
 

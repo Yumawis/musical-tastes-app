@@ -1,5 +1,5 @@
 const mongoose = require("mongoose");
-const Artist = require("./Artist");
+const Artist = require("../models/Artist");
 
 const albumSchema = new mongoose.Schema(
   {
@@ -18,7 +18,7 @@ const albumSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-// ✅ Middleware: al guardar un álbum → se agrega su ID al artista
+// ✅ Middleware: al guardar un álbum → se agrega su ID al artista, arrow function
 albumSchema.post("save", async function (doc) {
   try {
     await Artist.findByIdAndUpdate(doc.artistId, {
@@ -37,14 +37,30 @@ albumSchema.pre(
   { document: true, query: false },
   async function (next) {
     try {
+      const albumId = this._id;
+      const artistId = this.artistId;
+
+      console.log(`🧹 Eliminando canciones del álbum: ${albumId}`);
+
+      // 🔸 Obtenemos el modelo Song sin importar dependencias circulares
+      const Song = mongoose.model("Song");
+
+      // 🔸 Eliminar canciones relacionadas con este álbum
+      const deletedSongs = await Song.deleteMany({ albumId });
+
+      console.log(`🎶 Canciones eliminadas: ${deletedSongs.deletedCount}`);
+
+      // 🔸 Desvincular el álbum del artista
       await Artist.findByIdAndUpdate(this.artistId, {
         $pull: { albumId: this._id },
       });
 
-      console.log(`🧽 Álbum ${this._id} eliminado de artista ${this.artistId}`);
+      console.log(`🧽 Álbum ${albumId} desvinculado de artista ${artistId}`);
 
       next();
     } catch (error) {
+      console.error("❌ Error al eliminar álbum o sus canciones:", error);
+
       next(error);
     }
   }

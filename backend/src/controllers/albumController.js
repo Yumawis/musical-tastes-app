@@ -52,7 +52,9 @@ const createAlbum = async (req, res) => {
       tracklist,
     });
 
+    // Actualizar el artista automáticamente
     const savedAlbum = await newAlbum.save();
+
     console.log("✅ Albúm creado:", savedAlbum);
 
     const response = {
