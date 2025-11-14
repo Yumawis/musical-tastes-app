@@ -1,13 +1,10 @@
 const Artist = require("../models/Artist");
+
 const { validateArtistData } = require("../validators/artistValidator");
 
 // 👉 Crear artista
 const createArtist = async (req, res) => {
   try {
-    const { name, image, albumId } = req.body;
-
-    console.log("🎨 Creando nuevo artista...");
-
     // 🔹 Validar datos
     const validationError = validateArtistData(req.body);
 
@@ -19,18 +16,13 @@ const createArtist = async (req, res) => {
       });
     }
 
-    // 🔍 Verificar duplicado
-    const existingArtistId = await Artist.findOne({ name });
+    console.log("🎨 Creando nuevo artista...");
 
-    if (existingArtistId) {
-      return res.status(422).json({
-        data: { message: "Ya existe un artista con ese nombre" },
-      });
-    }
+    const { name, genre, image, albums, songs } = req.body;
 
     // 💾 Crear artista
-    const newArtistId = new Artist({ name, image, albumId });
-    const savedArtist = await newArtistId.save();
+    const newArtist = new Artist({ name, genre, image, albums, songs });
+    const savedArtist = await newArtist.save();
 
     console.log("✅ Artista creado:", savedArtist);
 
@@ -45,7 +37,7 @@ const createArtist = async (req, res) => {
   } catch (error) {
     const errorMessage = error.message;
 
-    console.error("❌ Error al crear el artista", errorMessage);
+    console.error("❌ Error al crear el artista:", errorMessage);
 
     const response = {
       data: {
@@ -59,20 +51,18 @@ const createArtist = async (req, res) => {
 };
 
 // 👉 Obtener todos los artistas
-const getAllArtistsId = async (req, res) => {
+const getAllArtists = async (req, res) => {
   try {
     console.log("📋 Obteniendo lista de artistas...");
 
-    const artistsId = await Artist.find()
-      .populate("albumId", "title releaseDate coverImage")
-      .populate("songId", "title duration");
+    const artists = await Artist.find();
 
-    console.log("✅ Artistas encontrados:", artistsId.length);
+    console.log("✅ Artistas encontrados:", artists.length);
 
     const response = {
       data: {
         message: "Artistas encontrados",
-        result: artistsId,
+        result: artists,
       },
     };
 
@@ -100,21 +90,20 @@ const getArtistById = async (req, res) => {
 
     console.log(`🔍 Buscando artista con ID: ${id}`);
 
-    const artistId = await Artist.findById(id).populate(
-      "albumId",
-      "title coverImage releaseDate"
-    );
+    const artist = await Artist.findById(id).populate("albums", "title");
 
-    if (!artistId) {
+    if (!artist) {
       return res.status(400).json({
         data: { message: "Artista no encontrado" },
       });
     }
 
+    console.log("✅ Artista encontrado:", artist);
+
     const response = {
       data: {
         message: "Artista encontrado correctamente",
-        result: artistId,
+        result: artist,
       },
     };
 
@@ -130,20 +119,20 @@ const getArtistById = async (req, res) => {
         error: errorMessage,
       },
     };
+
     return res.status(422).json(response);
   }
 };
 
 // 👉 Actualizar artista
-const updateArtistId = async (req, res) => {
+const updateArtist = async (req, res) => {
   try {
-    console.log(`✏️ Actualizando artista con ID: ${id}`);
-
     const { id } = req.params;
     const { name, image } = req.body;
 
     // 🔹 Validar datos
-    const validationError = validateArtistData(req.body);
+    const validationError = validateArtistData({ name });
+
     if (validationError) {
       return res.status(400).json({
         data: {
@@ -152,10 +141,12 @@ const updateArtistId = async (req, res) => {
       });
     }
 
+    console.log(`✏️ Actualizando artista con ID: ${id}`);
+
     // 🔹 Verificar duplicado (si el nombre cambia)
     const existingArtist = await Artist.findOne({ name });
 
-    if (existingArtist && existingArtist._id.toString() !== id) {
+    if (existingArtist && existingArtist._id !== id) {
       return res.status(422).json({
         data: {
           message: "Ya existe otro artista con ese nombre",
@@ -164,17 +155,9 @@ const updateArtistId = async (req, res) => {
     }
 
     // 🔹 Actualizar datos
-    const updatedArtist = await Artist.findByIdAndUpdate(
-      id,
-      { name, image },
-      { new: true }
-    );
+    const updatedArtist = await Artist.findByIdAndUpdate(id, { name, image }, { new: true });
 
-    if (!updatedArtist) {
-      return res.status(404).json({
-        data: { message: "Artista no encontrado" },
-      });
-    }
+    console.log("✅ Artista actualizado:", updatedArtist);
 
     const response = {
       data: {
@@ -224,8 +207,7 @@ const deleteArtist = async (req, res) => {
     // ✅ Respuesta al cliente
     const response = {
       data: {
-        message:
-          "Artista eliminado correctamente junto con sus álbumes relacionados",
+        message: "Artista eliminado correctamente junto con sus álbumes relacionados",
       },
     };
 
@@ -248,8 +230,8 @@ const deleteArtist = async (req, res) => {
 
 module.exports = {
   createArtist,
-  getAllArtistsId,
+  getAllArtists,
   getArtistById,
-  updateArtistId,
+  updateArtist,
   deleteArtist,
 };

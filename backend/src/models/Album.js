@@ -11,9 +11,7 @@ const albumSchema = new mongoose.Schema(
       ref: "Artist",
       required: true,
     },
-    tracklist: [
-      { type: mongoose.Schema.Types.ObjectId, ref: "Song", required: false },
-    ],
+    tracklist: [{ type: mongoose.Schema.Types.ObjectId, ref: "Song", required: true }],
   },
   { timestamps: true }
 );
@@ -32,38 +30,34 @@ albumSchema.post("save", async function (doc) {
 });
 
 // 🧹 Middleware: al eliminar un álbum → se quita del artista
-albumSchema.pre(
-  "deleteOne",
-  { document: true, query: false },
-  async function (next) {
-    try {
-      const albumId = this._id;
-      const artistId = this.artistId;
+albumSchema.pre("deleteOne", { document: true, query: false }, async function (next) {
+  try {
+    const albumId = this._id;
+    const artistId = this.artistId;
 
-      console.log(`🧹 Eliminando canciones del álbum: ${albumId}`);
+    console.log(`🧹 Eliminando canciones del álbum: ${albumId}`);
 
-      // 🔸 Obtenemos el modelo Song sin importar dependencias circulares
-      const Song = mongoose.model("Song");
+    // 🔸 Obtenemos el modelo Song sin importar dependencias circulares
+    const Song = mongoose.model("Song");
 
-      // 🔸 Eliminar canciones relacionadas con este álbum
-      const deletedSongs = await Song.deleteMany({ albumId });
+    // 🔸 Eliminar canciones relacionadas con este álbum
+    const deletedSongs = await Song.deleteMany({ albumId });
 
-      console.log(`🎶 Canciones eliminadas: ${deletedSongs.deletedCount}`);
+    console.log(`🎶 Canciones eliminadas: ${deletedSongs.deletedCount}`);
 
-      // 🔸 Desvincular el álbum del artista
-      await Artist.findByIdAndUpdate(this.artistId, {
-        $pull: { albumId: this._id },
-      });
+    // 🔸 Desvincular el álbum del artista
+    await Artist.findByIdAndUpdate(this.artistId, {
+      $pull: { albumId: this._id },
+    });
 
-      console.log(`🧽 Álbum ${albumId} desvinculado de artista ${artistId}`);
+    console.log(`🧽 Álbum ${albumId} desvinculado de artista ${artistId}`);
 
-      next();
-    } catch (error) {
-      console.error("❌ Error al eliminar álbum o sus canciones:", error);
+    next();
+  } catch (error) {
+    console.error("❌ Error al eliminar álbum o sus canciones:", error);
 
-      next(error);
-    }
+    next(error);
   }
-);
+});
 
 module.exports = mongoose.model("Album", albumSchema);

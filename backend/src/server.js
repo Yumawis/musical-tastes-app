@@ -37,10 +37,9 @@ app.use(`${prefix}/user`, userRoutes);
 
 // ⚙️ Start the server
 app.listen(process.env.PORT, () => {
-  console.log("========================================");
+  console.log("=======================================================");
   console.log("🟢 Servidor iniciado correctamente");
   console.log(`🌐 URL base: http://localhost:${process.env.PORT}`);
   console.log("⚙️ Configuración:");
   console.log(`     - CORS permitido: ${process.env.ALLOWED_CORS}`);
-  console.log("========================================\n");
 });

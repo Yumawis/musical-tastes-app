@@ -3,9 +3,9 @@ const router = express.Router();
 
 const {
   createArtist,
-  getAllArtistsId,
+  getAllArtists,
   getArtistById,
-  updateArtistId,
+  updateArtist,
   deleteArtist,
 } = require("../controllers/artistController");
 
@@ -13,13 +13,13 @@ const {
 router.post("/", createArtist);
 
 // 👉 Obtener todos los artistas
-router.get("/", getAllArtistsId);
+router.get("/", getAllArtists);
 
 // 👉 Obtener un solo artista
 router.get("/:id", getArtistById);
 
 // 👉 Actualizar artista
-router.put("/:id", updateArtistId);
+router.put("/:id", updateArtist);
 
 // 👉 Eliminar artista
 router.delete("/:id", deleteArtist);
