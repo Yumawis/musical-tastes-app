@@ -8,16 +8,36 @@ const songSchema = new mongoose.Schema(
       ref: "Artist",
       required: true,
     },
-    releaseDate: { type: Date, require: true },
+    releaseDate: { type: Date },
     duration: { type: String, require: true },
     albumId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Album",
       default: null,
-      require: false,
     },
   },
   { timestamps: true }
 );
+
+songSchema.post("save", { document: true, query: false }, async function (doc) {
+  try {
+    const albumId = doc.albumId;
+
+    if (!albumId) {
+      console.log("🎵 La canción no se agrega a ningún álbum porque no tiene albumId");
+      return;
+    }
+
+    const Album = mongoose.model("Album");
+
+    await Album.findByIdAndUpdate(albumId, {
+      $addToSet: { tracklist: doc._id },
+    });
+
+    console.log(`🎵 La canción ${doc._id} fue agregada al álbum ${albumId}`);
+  } catch (error) {
+    console.error("❌ Error agregando la canción álbum:", error);
+  }
+});
 
 module.exports = mongoose.model("Song", songSchema);

@@ -11,7 +11,9 @@ const albumSchema = new mongoose.Schema(
       ref: "Artist",
       required: true,
     },
-    tracklist: [{ type: mongoose.Schema.Types.ObjectId, ref: "Song", required: true }],
+    tracklist: {
+      type: [{ type: mongoose.Schema.Types.ObjectId, ref: "Song" }],
+    },
   },
   { timestamps: true }
 );

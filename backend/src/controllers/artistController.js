@@ -94,7 +94,7 @@ const getArtistById = async (req, res) => {
 
     console.log(`🔍 Buscando artista con ID: ${id}`);
 
-    const artist = await Artist.findById(id).populate("albums", "title");
+    const artist = await Artist.findById(id);
 
     if (!artist) {
       return res.status(400).json({

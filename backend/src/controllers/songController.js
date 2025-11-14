@@ -6,8 +6,6 @@ const { validateSongData } = require("../validators/songValidator");
 // 👉 Crear canción
 const createSong = async (req, res) => {
   try {
-    console.log("💿 Creando nueva canción...");
-
     // ✅ Validar datos
     const validationError = validateSongData(req.body);
 
@@ -19,14 +17,16 @@ const createSong = async (req, res) => {
       });
     }
 
+    console.log("💿 Creando nueva canción...");
+
     const { title, artistId, releaseDate, duration, albumId } = req.body;
 
     // 🔎 Verificar que el artista exista
-    const artistExists = await Artist.findById(artistId);
+    const existingArtist = await Artist.findById(artistId);
 
-    if (!artistExists) {
+    if (!existingArtist) {
       return res.status(404).json({
-        data: { message: "El artista indicado no existe" },
+        data: { message: "El artista enviado no existe" },
       });
     }
 
@@ -47,17 +47,10 @@ const createSong = async (req, res) => {
       artistId,
       releaseDate,
       duration,
-      albumId: albumId || null,
+      albumId,
     });
 
     const savedSong = await newSong.save();
-
-    // Si tiene álbum, agregarla al tracklist
-    if (albumId) {
-      await Album.findByIdAndUpdate(albumId, {
-        $push: { tracklist: savedSong._id },
-      });
-    }
 
     // ✅ Respuesta final
     const response = {
@@ -86,9 +79,7 @@ const createSong = async (req, res) => {
 // 👉 Obtener todas las canciones
 const getAllSong = async (req, res) => {
   try {
-    const songs = await Song.find()
-      .populate("artistId", "name")
-      .populate("albumId", "title coverImage releaseDate");
+    const songs = await Song.find();
 
     console.log("✅ Canciones encontradas:", songs.length);
 
@@ -119,17 +110,20 @@ const getAllSong = async (req, res) => {
 const getSongById = async (req, res) => {
   try {
     const { id } = req.params;
+
     console.log(`🔍 Buscando canciones con ID: ${id}`);
 
     const song = await Song.findById(id)
       .populate("artistId", "name image")
-      .populate("albumId", "title coverImage releaseDate");
+      .populate("albumId", "title releaseDate coverImage");
 
     if (!song) {
       return res.status(404).json({
         data: { message: "Canción no encontrada" },
       });
     }
+
+    console.log("✅ Canción encontrada:", song);
 
     const response = {
       data: {
@@ -159,10 +153,10 @@ const updateSong = async (req, res) => {
   try {
     const { id } = req.params;
 
-    console.log(`✏️ Actualizando canción con ID: ${id}`);
+    const songData = req.body;
 
     // 🔹 Validar los datos antes de actualizar
-    const validationError = validateSongData(req.body);
+    const validationError = validateSongData(songData);
 
     if (validationError) {
       return res.status(400).json({
@@ -172,8 +166,10 @@ const updateSong = async (req, res) => {
       });
     }
 
+    console.log(`✏️ Actualizando canción con ID: ${id}`);
+
     // 🔹 Intentar actualizar la canción
-    const updatedSong = await Song.findByIdAndUpdate(id, req.body, {
+    const updatedSong = await Song.findByIdAndUpdate(id, songData, {
       new: true,
     });
 
@@ -182,6 +178,8 @@ const updateSong = async (req, res) => {
         data: { message: "Canción no encontrada" },
       });
     }
+
+    console.log(`✏️ Canción ${id} actualizada correctamente`);
 
     const response = {
       data: {
@@ -229,11 +227,13 @@ const deleteSong = async (req, res) => {
         $pull: { tracklist: song._id },
       });
 
-      console.log("🧹 Canción removida del tracklist del álbum");
+      console.log("🧹 Canción eliminada del tracklist del álbum");
     }
 
     // 🗑️ Eliminar la canción
     await Song.findByIdAndDelete(id);
+
+    console.log("🧹 Canción eliminada correctamente");
 
     const response = {
       data: {
