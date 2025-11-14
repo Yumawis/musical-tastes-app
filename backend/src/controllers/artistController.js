@@ -39,6 +39,10 @@ const createArtist = async (req, res) => {
 
     console.error("❌ Error al crear el artista:", errorMessage);
 
+    if (error.code === 11000) {
+      return res.status(422).json({ data: { message: "Ya existe un artista con ese nombre" } });
+    }
+
     const response = {
       data: {
         message: "Ocurrió un error al crear el artista",
