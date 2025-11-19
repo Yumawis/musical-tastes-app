@@ -52,6 +52,8 @@ const createSong = async (req, res) => {
 
     const savedSong = await newSong.save();
 
+    console.log("✅ Canción creada:", savedSong);
+
     // ✅ Respuesta final
     const response = {
       data: {
@@ -153,23 +155,12 @@ const updateSong = async (req, res) => {
   try {
     const { id } = req.params;
 
-    const songData = req.body;
-
-    // 🔹 Validar los datos antes de actualizar
-    const validationError = validateSongData(songData);
-
-    if (validationError) {
-      return res.status(400).json({
-        data: {
-          message: validationError,
-        },
-      });
-    }
+    const newData = req.body;
 
     console.log(`✏️ Actualizando canción con ID: ${id}`);
 
     // 🔹 Intentar actualizar la canción
-    const updatedSong = await Song.findByIdAndUpdate(id, songData, {
+    const updatedSong = await Song.findByIdAndUpdate(id, newData, {
       new: true,
     });
 
@@ -210,10 +201,8 @@ const deleteSong = async (req, res) => {
   try {
     const { id } = req.params;
 
-    console.log(`✏️ Eliminando canción con ID: ${id}`);
-
-    // 🔎 Buscar la canción antes de eliminarla
-    const song = await Song.findByIdAndDelete(id);
+    // 🔎 Buscar la canción
+    const song = await Song.findById(id);
 
     if (!song) {
       return res.status(400).json({
@@ -221,17 +210,8 @@ const deleteSong = async (req, res) => {
       });
     }
 
-    // 💿 Si la canción pertenece a un álbum, eliminarla del tracklist
-    if (song.albumId) {
-      await Album.findByIdAndUpdate(song.albumId, {
-        $pull: { tracklist: song._id },
-      });
-
-      console.log("🧹 Canción eliminada del tracklist del álbum");
-    }
-
-    // 🗑️ Eliminar la canción
-    await Song.findByIdAndDelete(id);
+    // 🗑️ Eliminar la canción (aquí se ejecuta el middleware)
+    await song.deleteOne();
 
     console.log("🧹 Canción eliminada correctamente");
 

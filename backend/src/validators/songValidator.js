@@ -1,17 +1,15 @@
 const mongoose = require("mongoose");
 
-const validateSongData = (songData = {}) => {
-  const { artistId, title, releaseDate, albumId } = songData;
+const validateSongData = (data) => {
+  const { artistId, title, releaseDate, albumId } = data;
 
   if (!artistId || !mongoose.Types.ObjectId.isValid(artistId))
-    return "La canción debe tener un artista válido asociado";
+    return "La variable artistId es requerida para crear una canción";
 
-  if (!title || title.trim() === "") return "El título de la canción es obligatorio";
+  if (!title || title.trim() === "") return "La variable title es obligatoria";
 
   if (!albumId && !releaseDate)
-    return "Debes indicar una fecha de lanzamiento si la canción no forma parte de un álbum.";
-
-  if (albumId && !mongoose.Types.ObjectId.isValid(albumId)) return "El ID del álbum no es válido.";
+    return "La variable releaseDate es obligatoria si la canción no pertenece a ningún álbum";
 
   return null;
 };

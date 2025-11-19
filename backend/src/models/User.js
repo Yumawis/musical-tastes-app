@@ -1,12 +1,14 @@
 const mongoose = require("mongoose");
 const bcrypt = require("bcrypt");
 
+const ROLES = require("../constants/roles");
+
 const userSchema = new mongoose.Schema({
-  rol: { type: String, enum: ["ADMIN", "CLIENT"], default: "CLIENT" },
+  rol: { type: String, enum: [ROLES.ADMIN, ROLES.CLIENT], default: ROLES.CLIENT },
   names: { type: String, trim: true, required: true },
-  lastnames: { type: String, trim: true, required: true },
+  lastNames: { type: String, trim: true, required: true },
   email: { type: String, trim: true, unique: true, required: true },
-  password: { type: String, trim: true, required: true },
+  password: { type: String, trim: true, minLength: 6, required: true },
 });
 
 // 🔐 Middleware: cifrar contraseña antes de guardar
@@ -24,8 +26,8 @@ userSchema.pre("save", async function (next) {
 });
 
 // 🧠 Método para comparar contraseñas
-userSchema.methods.checkPassword = async function (candidatePassword) {
-  return await bcrypt.compare(candidatePassword, this.password);
+userSchema.methods.checkPassword = async function (currentPassword) {
+  return await bcrypt.compare(currentPassword, this.password);
 };
 
 module.exports = mongoose.model("User", userSchema);

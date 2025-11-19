@@ -6,12 +6,10 @@ const { validateAlbumData } = require("../validators/albumValidator");
 // 👉 Crear álbum
 const createAlbum = async (req, res) => {
   try {
-    console.log("💿 Creando nuevo álbum...");
-
-    const { title, releaseDate, coverImage, artistId, tracklist } = req.body;
+    const { artistId, title, releaseDate, tracklist, coverImage } = req.body;
 
     // 🧩 Validación
-    const validationError = validateAlbumData({ artistId, title });
+    const validationError = validateAlbumData({ artistId, title, releaseDate });
 
     if (validationError) {
       return res.status(400).json({
@@ -20,6 +18,8 @@ const createAlbum = async (req, res) => {
         },
       });
     }
+
+    console.log("💿 Creando nuevo álbum...");
 
     // ⚠️ Verificar que exista el artista
     const existingArtist = await Artist.findById(artistId);
@@ -67,6 +67,7 @@ const createAlbum = async (req, res) => {
     return res.status(200).json(response);
   } catch (error) {
     const errorMessage = error.message;
+
     console.error("❌ Error al crear el álbum", errorMessage);
 
     const response = {
@@ -83,17 +84,11 @@ const createAlbum = async (req, res) => {
 // 👉 Obtener todos los álbumes
 const getAllAlbums = async (req, res) => {
   try {
-    console.log("🎵 Obteniendo todos los álbumes...");
-
     const albums = await Album.find()
       .populate("artistId", "name image")
       .populate("tracklist", "title duration");
 
-    if (albums.length === 0) {
-      return res.status(404).json({
-        data: { message: "No hay álbumes registrados aún." },
-      });
-    }
+    console.log("✅ Álbumes encontrados:", albums.length);
 
     const response = {
       data: {
@@ -105,6 +100,7 @@ const getAllAlbums = async (req, res) => {
     return res.status(200).json(response);
   } catch (error) {
     const errorMessage = error.message;
+
     console.error("❌ Error interno al obtener los álbumes:", errorMessage);
 
     const response = {
@@ -135,6 +131,8 @@ const getAlbumById = async (req, res) => {
       });
     }
 
+    console.log("✅ álbum encontrado:", album);
+
     const response = {
       data: {
         message: "Álbum encontrado correctamente",
@@ -145,6 +143,7 @@ const getAlbumById = async (req, res) => {
     return res.status(200).json(response);
   } catch (error) {
     const errorMessage = error.message;
+
     console.error("❌ Error obteniendo el álbum por ID:", errorMessage);
 
     const response = {
@@ -161,22 +160,13 @@ const getAlbumById = async (req, res) => {
 // 👉 Actualizar álbum
 const updateAlbum = async (req, res) => {
   try {
+    const { id } = req.params;
+    const newData = req.body;
+
     console.log(`✏️ Actualizando álbum con ID: ${id}`);
 
-    const { id } = req.params;
-    const { title, artist } = req.body;
-
-    // 🧩 Validación de datos
-    const validationError = validateAlbumData({ title, artistId });
-
-    if (validationError) {
-      return res.status(400).json({
-        data: { message: validationError },
-      });
-    }
-
     // 💾 Actualizar el álbum
-    const updatedAlbum = await Album.findByIdAndUpdate(id, req.body, {
+    const updatedAlbum = await Album.findByIdAndUpdate(id, newData, {
       new: true,
     });
 
@@ -185,6 +175,8 @@ const updateAlbum = async (req, res) => {
         data: { message: "Album no encontrado" },
       });
     }
+
+    console.log("✅ Álbum actualizado:", updatedAlbum);
 
     const response = {
       data: {
@@ -196,6 +188,7 @@ const updateAlbum = async (req, res) => {
     return res.status(200).json(response);
   } catch (error) {
     const errorMessage = error.message;
+
     console.error("❌ Error actualizando el artista:", errorMessage);
 
     const response = {
@@ -213,7 +206,6 @@ const updateAlbum = async (req, res) => {
 const deleteAlbum = async (req, res) => {
   try {
     const { id } = req.params;
-    console.log(`✏️ Eliminando artista con ID: ${id}`);
 
     const album = await Album.findById(id);
 
@@ -227,7 +219,7 @@ const deleteAlbum = async (req, res) => {
 
     await album.deleteOne();
 
-    console.log(`✅ Álbum eliminado correctamente`);
+    console.log("✅ Álbum eliminado correctamente:");
 
     const response = {
       data: {

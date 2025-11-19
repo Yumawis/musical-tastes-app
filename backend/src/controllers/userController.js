@@ -1,120 +1,9 @@
 const User = require("../models/User");
 
-const createUser = async (req, res) => {
-  try {
-    const { names, lastnames, email, password, rol } = req.body;
-
-    console.log("Creando nuevo usuario...");
-
-    const existingUser = await User.findOne({ email });
-
-    if (existingUser) {
-      return res.status(400).json({
-        data: {
-          message: "El email ya está registrado",
-        },
-      });
-    }
-
-    const user = new User({
-      names,
-      lastnames,
-      email,
-      password,
-      rol: rol || "CLIENT",
-    });
-
-    await user.save();
-
-    const response = {
-      data: {
-        message: "Usuario registrado exitosamente",
-        result: user._id,
-      },
-    };
-
-    return res.status(200).json(response);
-  } catch (error) {
-    const errorMessage = error.message;
-
-    console.error("❌ Error al crear el usuario", errorMessage);
-
-    const response = {
-      data: {
-        message: "Error al crear el usuario",
-        error: errorMessage,
-      },
-    };
-
-    return res.status(422).json(response);
-  }
-};
-
-// 👉 Iniciar sesión básico
-const loginUser = async (req, res) => {
-  try {
-    const { email, password } = req.body;
-
-    console.log("🔐 Iniciando sesión de usario...");
-
-    // 1️⃣ Buscar al usuario por su email
-    const user = await User.findOne({ email });
-
-    if (!user) {
-      return res.status(404).json({
-        data: {
-          message: "Usuario no encontrado",
-        },
-      });
-    }
-
-    // 2️⃣ Verificar la contraseña usando bcrypt
-    const isMatch = await user.checkPassword(password);
-
-    if (!isMatch) {
-      return res.status(400).json({
-        data: {
-          message: "Contraseña incorrecta",
-        },
-      });
-    }
-
-    // 3️⃣ Si es correcta, devuelves info del usuario
-    const response = {
-      data: {
-        message: "Inicio de sesión exitoso ✅",
-        result: {
-          id: user._id,
-          names: user.names,
-          email: user.email,
-          rol: user.rol,
-        },
-      },
-    };
-
-    return res.status(200).json(response);
-  } catch (error) {
-    const errorMessage = error.message;
-
-    console.error("❌ Error iniciando sesión", errorMessage);
-
-    const response = {
-      data: {
-        message: "Error al iniciar sesión",
-        error: errorMessage,
-      },
-    };
-
-    return res.status(422).json(response);
-  }
-};
-
 // 👉 Obtener todos los usuarios
 const getAllUsers = async (req, res) => {
   try {
-    const users = await User.find();
-
-    console.log("Obteniendo todos los usuarios...");
+    const users = await User.find().select("-password");
 
     const response = {
       data: {
@@ -145,9 +34,7 @@ const getUserById = async (req, res) => {
   try {
     const { id } = req.params;
 
-    console.log(`🔍 Buscando usuarios con ID: ${id}`);
-
-    const user = await User.findById(id);
+    const user = await User.findById(id).select("-password");
 
     if (!user) {
       return res.status(404).json({
@@ -156,6 +43,8 @@ const getUserById = async (req, res) => {
         },
       });
     }
+
+    console.log("✅ Usuario encontrado:", user);
 
     const response = {
       data: {
@@ -185,22 +74,9 @@ const getUserById = async (req, res) => {
 const updateUser = async (req, res) => {
   try {
     const { id } = req.params;
-    const { names, lastnames, email, rol } = req.body;
+    const newData = req.body;
 
-    console.log(`✏️ Actualizando usuario con ID: ${id}`);
-
-    const updatedUser = await User.findByIdAndUpdate(
-      id,
-      { names, lastnames, email, rol },
-      { new: true }
-    );
-
-    if (!updatedUser)
-      return res.status(404).json({
-        data: {
-          message: "Usuario no encontrado",
-        },
-      });
+    const updatedUser = await User.findByIdAndUpdate(id, newData, { new: true });
 
     const response = {
       data: {
@@ -231,8 +107,6 @@ const deleteUser = async (req, res) => {
   try {
     const { id } = req.params;
 
-    console.log(`✏️ Eliminando usuario con ID: ${id}`);
-
     const deletedUser = await User.findByIdAndDelete(id);
 
     if (!deletedUser)
@@ -241,6 +115,8 @@ const deleteUser = async (req, res) => {
           message: "El usuario no existe o ya fue eliminado",
         },
       });
+
+    console.log("🧹 Usuario eliminado exitosamente");
 
     const response = {
       data: {
@@ -266,8 +142,6 @@ const deleteUser = async (req, res) => {
 };
 
 module.exports = {
-  createUser,
-  loginUser,
   getAllUsers,
   getUserById,
   updateUser,

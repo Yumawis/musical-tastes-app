@@ -65,7 +65,7 @@ const getAllArtists = async (req, res) => {
 
     const response = {
       data: {
-        message: "Artistas encontrados",
+        message: "Artistas encontrados exitosamente",
         result: artists,
       },
     };
@@ -132,18 +132,9 @@ const getArtistById = async (req, res) => {
 const updateArtist = async (req, res) => {
   try {
     const { id } = req.params;
-    const { name, image } = req.body;
 
-    // 🔹 Validar datos
-    const validationError = validateArtistData({ name });
-
-    if (validationError) {
-      return res.status(400).json({
-        data: {
-          message: validationError,
-        },
-      });
-    }
+    const newData = req.body;
+    const { name } = newData;
 
     console.log(`✏️ Actualizando artista con ID: ${id}`);
 
@@ -159,7 +150,7 @@ const updateArtist = async (req, res) => {
     }
 
     // 🔹 Actualizar datos
-    const updatedArtist = await Artist.findByIdAndUpdate(id, { name, image }, { new: true });
+    const updatedArtist = await Artist.findByIdAndUpdate(id, newData, { new: true });
 
     console.log("✅ Artista actualizado:", updatedArtist);
 
@@ -192,8 +183,6 @@ const deleteArtist = async (req, res) => {
   try {
     const { id } = req.params;
 
-    console.log(`✏️ Eliminando artista con ID: ${id}`);
-
     // 🟢 Buscar el artista primero
     const artist = await Artist.findById(id);
 
@@ -207,6 +196,8 @@ const deleteArtist = async (req, res) => {
 
     // 🗑️ Eliminar el artista (esto activará el middleware pre("deleteOne"))
     await artist.deleteOne();
+
+    console.log("✅ Artista eliminado correctamente:");
 
     // ✅ Respuesta al cliente
     const response = {
