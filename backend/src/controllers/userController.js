@@ -7,7 +7,7 @@ const getAllUsers = async (req, res) => {
 
     const response = {
       data: {
-        message: "Usuarios obtenidos exitosamente",
+        message: "Usuarios obtenidos correctamente",
         result: users,
       },
     };
@@ -20,7 +20,7 @@ const getAllUsers = async (req, res) => {
 
     const response = {
       data: {
-        message: "Error obteniendo todos los usuarios",
+        message: "Ocurrió un error al obtener los usuarios",
         error: errorMessage,
       },
     };
@@ -48,7 +48,7 @@ const getUserById = async (req, res) => {
 
     const response = {
       data: {
-        message: "Usuario encontrado correctamente",
+        message: "Usuario obtenido correctamente",
         result: user,
       },
     };
@@ -61,7 +61,7 @@ const getUserById = async (req, res) => {
 
     const response = {
       data: {
-        message: "Error al obtener el usuario",
+        message: "Ocurrió un error al obtener el usuario",
         error: errorMessage,
       },
     };
@@ -93,7 +93,7 @@ const updateUser = async (req, res) => {
 
     const response = {
       data: {
-        message: "Error al actualizar el usuario",
+        message: "Ocurrió un error al actualizar el usuario",
         error: error.message,
       },
     };
@@ -116,11 +116,11 @@ const deleteUser = async (req, res) => {
         },
       });
 
-    console.log("🧹 Usuario eliminado exitosamente");
+    console.log("🧹 Usuario eliminado correctamente");
 
     const response = {
       data: {
-        message: "Usuario eliminado exitosamente",
+        message: "Usuario eliminado correctamente",
       },
     };
 
@@ -132,7 +132,7 @@ const deleteUser = async (req, res) => {
 
     const response = {
       data: {
-        message: "Error al eliminar el usuario",
+        message: "Ocurrió un error al eliminar el usuario",
         error: errorMessage,
       },
     };

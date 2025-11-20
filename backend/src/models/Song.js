@@ -1,4 +1,5 @@
 const mongoose = require("mongoose");
+const FAVORITE_TYPES = require("../constants/favoriteTypes");
 
 const songSchema = new mongoose.Schema(
   {
@@ -14,6 +15,13 @@ const songSchema = new mongoose.Schema(
       type: mongoose.Schema.Types.ObjectId,
       ref: "Album",
       default: null,
+    },
+    type: {
+      type: String,
+      trim: true,
+      enum: FAVORITE_TYPES.SONG,
+      default: FAVORITE_TYPES.SONG,
+      required: true,
     },
   },
   { timestamps: true }

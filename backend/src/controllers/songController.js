@@ -1,13 +1,21 @@
 const Artist = require("../models/Artist");
 const Song = require("../models/Song");
-const Album = require("../models/Album");
-const { validateSongData } = require("../validators/songValidator");
+
+const { validateSong } = require("../validators/songValidator");
 
 // 👉 Crear canción
 const createSong = async (req, res) => {
   try {
+    const { title, artistId, releaseDate, duration, albumId, type } = req.body;
     // ✅ Validar datos
-    const validationError = validateSongData(req.body);
+    const validationError = validateSong({
+      title,
+      artistId,
+      releaseDate,
+      duration,
+      albumId,
+      type,
+    });
 
     if (validationError) {
       return res.status(400).json({
@@ -16,10 +24,6 @@ const createSong = async (req, res) => {
         },
       });
     }
-
-    console.log("💿 Creando nueva canción...");
-
-    const { title, artistId, releaseDate, duration, albumId } = req.body;
 
     // 🔎 Verificar que el artista exista
     const existingArtist = await Artist.findById(artistId);
@@ -48,6 +52,7 @@ const createSong = async (req, res) => {
       releaseDate,
       duration,
       albumId,
+      type,
     });
 
     const savedSong = await newSong.save();
@@ -57,7 +62,7 @@ const createSong = async (req, res) => {
     // ✅ Respuesta final
     const response = {
       data: {
-        message: "Canción creada exitosamente",
+        message: "Canción creada correctamente",
         album: savedSong,
       },
     };
@@ -83,11 +88,11 @@ const getAllSong = async (req, res) => {
   try {
     const songs = await Song.find();
 
-    console.log("✅ Canciones encontradas:", songs.length);
+    console.log("✅ Canciones obtenidas:", songs.length);
 
     const response = {
       data: {
-        message: "Canciones encontradas exitosamente",
+        message: "Canciones obtenidas correctamente",
         result: songs,
       },
     };
@@ -99,7 +104,7 @@ const getAllSong = async (req, res) => {
 
     const response = {
       data: {
-        message: "Error al obtener las canciones",
+        message: "Ocurrió un error al obtener las canciones",
         error: errorMessage,
       },
     };
@@ -125,11 +130,11 @@ const getSongById = async (req, res) => {
       });
     }
 
-    console.log("✅ Canción encontrada:", song);
+    console.log("✅ Canción obtenida:", song);
 
     const response = {
       data: {
-        message: "Canción encontrada correctamente",
+        message: "Canción obtenida correctamente",
         result: song,
       },
     };
@@ -141,7 +146,7 @@ const getSongById = async (req, res) => {
 
     const response = {
       data: {
-        message: "Error al obtener la canción",
+        message: "Ocurrió un error al obtener la canción",
         error: errorMessage,
       },
     };
@@ -187,7 +192,7 @@ const updateSong = async (req, res) => {
 
     const response = {
       data: {
-        message: "Error al actualizar la canción",
+        message: "Ocurrió un error al actualizar la canción",
         error: errorMessage,
       },
     };
@@ -229,7 +234,7 @@ const deleteSong = async (req, res) => {
 
     const response = {
       data: {
-        message: "Error al eliminar la canción",
+        message: "Ocurrió un error al eliminar la canción",
         error: errorMessage,
       },
     };

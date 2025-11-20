@@ -28,7 +28,7 @@ const createArtist = async (req, res) => {
 
     const response = {
       data: {
-        message: "Artista creado exitosamente",
+        message: "Artista creado correctamente",
         artistId: savedArtist._id,
       },
     };
@@ -65,7 +65,7 @@ const getAllArtists = async (req, res) => {
 
     const response = {
       data: {
-        message: "Artistas encontrados exitosamente",
+        message: "Artistas obtenidos correctamente",
         result: artists,
       },
     };
@@ -78,7 +78,7 @@ const getAllArtists = async (req, res) => {
 
     const response = {
       data: {
-        message: "Error al obtener los artistas",
+        message: "Ocurrió un error al obtener los artistas",
         error: errorMessage,
       },
     };
@@ -106,7 +106,7 @@ const getArtistById = async (req, res) => {
 
     const response = {
       data: {
-        message: "Artista encontrado correctamente",
+        message: "Artista obtenido correctamente",
         result: artist,
       },
     };
@@ -119,7 +119,7 @@ const getArtistById = async (req, res) => {
 
     const response = {
       data: {
-        message: "Error al obtener el artista",
+        message: "Ocurrió un error al obtener el artista",
         error: errorMessage,
       },
     };
@@ -169,7 +169,7 @@ const updateArtist = async (req, res) => {
 
     const response = {
       data: {
-        message: "Error al actualizar el artista",
+        message: "Ocurrió un error al actualizar el artista",
         error: errorMessage,
       },
     };
@@ -214,7 +214,7 @@ const deleteArtist = async (req, res) => {
 
     const response = {
       data: {
-        message: "Error al eliminar el artista",
+        message: "Ocurrió un error al eliminar el artista",
         error: errorMessage,
       },
     };

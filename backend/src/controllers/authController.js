@@ -38,11 +38,11 @@ const signUp = async (req, res) => {
     const savedUser = await newUser.save();
     const currentUser = { id: savedUser._id };
 
-    console.log("✅ Usuario creado exitosamente:", currentUser);
+    console.log("✅ Usuario creado correctamente:", currentUser);
 
     const response = {
       data: {
-        message: "Usuario registrado exitosamente",
+        message: "Usuario registrado correctamente",
         result: currentUser,
       },
     };
@@ -51,11 +51,11 @@ const signUp = async (req, res) => {
   } catch (error) {
     const errorMessage = error.message;
 
-    console.error("❌ Error al crear el usuario", errorMessage);
+    console.error("❌ Error al registrar el usuario", errorMessage);
 
     const response = {
       data: {
-        message: "Error al crear el usuario",
+        message: "Ocurrió un error al registrar el usuario",
         error: errorMessage,
       },
     };
@@ -113,7 +113,7 @@ const login = async (req, res) => {
 
     const response = {
       data: {
-        message: "Error al iniciar sesión",
+        message: "Ocurrió un error al iniciar sesión",
         error: errorMessage,
       },
     };

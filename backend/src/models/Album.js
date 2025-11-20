@@ -1,5 +1,6 @@
 const mongoose = require("mongoose");
 const Artist = require("../models/Artist");
+const FAVORITE_TYPES = require("../constants/favoriteTypes");
 
 const albumSchema = new mongoose.Schema(
   {
@@ -13,6 +14,13 @@ const albumSchema = new mongoose.Schema(
     },
     tracklist: {
       type: [{ type: mongoose.Schema.Types.ObjectId, ref: "Song" }],
+    },
+    type: {
+      type: String,
+      trim: true,
+      enum: FAVORITE_TYPES.ALBUM,
+      default: FAVORITE_TYPES.ALBUM,
+      required: true,
     },
   },
   { timestamps: true }

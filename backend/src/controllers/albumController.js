@@ -1,15 +1,15 @@
 const Album = require("../models/Album");
 const Artist = require("../models/Artist");
 
-const { validateAlbumData } = require("../validators/albumValidator");
+const { validateAlbum } = require("../validators/albumValidator");
 
 // 👉 Crear álbum
 const createAlbum = async (req, res) => {
   try {
-    const { artistId, title, releaseDate, tracklist, coverImage } = req.body;
+    const { artistId, title, releaseDate, type, tracklist, coverImage } = req.body;
 
     // 🧩 Validación
-    const validationError = validateAlbumData({ artistId, title, releaseDate });
+    const validationError = validateAlbum({ artistId, title, releaseDate, type });
 
     if (validationError) {
       return res.status(400).json({
@@ -50,6 +50,7 @@ const createAlbum = async (req, res) => {
       coverImage,
       artistId,
       tracklist,
+      type,
     });
 
     // Actualizar el artista automáticamente
@@ -59,7 +60,7 @@ const createAlbum = async (req, res) => {
 
     const response = {
       data: {
-        message: "Álbum creado exitosamente",
+        message: "Álbum creado correctamente",
         albumID: savedAlbum._id,
       },
     };
@@ -105,7 +106,7 @@ const getAllAlbums = async (req, res) => {
 
     const response = {
       data: {
-        message: "Error al obtener los álbumes",
+        message: "Ocurrió un error al obtener los álbumes",
         error: errorMessage,
       },
     };
@@ -135,7 +136,7 @@ const getAlbumById = async (req, res) => {
 
     const response = {
       data: {
-        message: "Álbum encontrado correctamente",
+        message: "Álbum obtenido correctamente",
         result: album,
       },
     };
@@ -148,7 +149,7 @@ const getAlbumById = async (req, res) => {
 
     const response = {
       data: {
-        message: "Error al obtener el álbum",
+        message: "Ocurrió un error al obtener el álbum",
         error: errorMessage,
       },
     };
@@ -189,11 +190,11 @@ const updateAlbum = async (req, res) => {
   } catch (error) {
     const errorMessage = error.message;
 
-    console.error("❌ Error actualizando el artista:", errorMessage);
+    console.error("❌ Error actualizando el álbum:", errorMessage);
 
     const response = {
       data: {
-        message: "Error al actualizar el artista",
+        message: "Ocurrió un error al actualizar el álbum",
         error: errorMessage,
       },
     };
@@ -235,7 +236,7 @@ const deleteAlbum = async (req, res) => {
 
     const response = {
       data: {
-        message: "Error al eliminar el álbum",
+        message: "Ocurrió un error al eliminar el álbum",
         error: errorMessage,
       },
     };
