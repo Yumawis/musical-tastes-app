@@ -10,11 +10,11 @@ const songSchema = new mongoose.Schema(
       required: true,
     },
     releaseDate: { type: Date },
+    coverImage: { type: String },
     duration: { type: String, require: true },
     albumId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Album",
-      default: null,
     },
     type: {
       type: String,

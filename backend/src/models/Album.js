@@ -6,14 +6,11 @@ const albumSchema = new mongoose.Schema(
   {
     title: { type: String, trim: true, required: true, unique: true },
     releaseDate: { type: Date, required: true },
-    coverImage: String,
+    coverImage: { type: String },
     artistId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Artist",
       required: true,
-    },
-    tracklist: {
-      type: [{ type: mongoose.Schema.Types.ObjectId, ref: "Song" }],
     },
     type: {
       type: String,
@@ -21,6 +18,9 @@ const albumSchema = new mongoose.Schema(
       enum: FAVORITE_TYPES.ALBUM,
       default: FAVORITE_TYPES.ALBUM,
       required: true,
+    },
+    tracklist: {
+      type: [{ type: mongoose.Schema.Types.ObjectId, ref: "Song" }],
     },
   },
   { timestamps: true }

@@ -33,4 +33,20 @@ userSchema.methods.checkPassword = async function (currentPassword) {
   return await bcrypt.compare(currentPassword, this.password);
 };
 
+userSchema.pre("deleteOne", { document: true }, async function (next) {
+  try {
+    const userId = this._id;
+
+    const FavoriteSong = mongoose.model("FavoriteSong");
+    const FavoriteAlbum = mongoose.model("FavoriteAlbum");
+
+    await FavoriteSong.deleteOne({ userId });
+    await FavoriteAlbum.deleteOne({ userId });
+
+    next();
+  } catch (error) {
+    next(error);
+  }
+});
+
 module.exports = mongoose.model("User", userSchema);

@@ -2,6 +2,7 @@ const Album = require("../models/Album");
 const Artist = require("../models/Artist");
 
 const { validateAlbum } = require("../validators/albumValidator");
+const { buildAlbumUpdateData } = require("../builders/albumBuilder");
 
 // 👉 Crear álbum
 const createAlbum = async (req, res) => {
@@ -162,12 +163,39 @@ const getAlbumById = async (req, res) => {
 const updateAlbum = async (req, res) => {
   try {
     const { id } = req.params;
+
+    const album = await Album.findById(id);
+
+    if (!album) {
+      return res.status(400).json({
+        data: { message: "Álbum no encontrado" },
+      });
+    }
+
     const newData = req.body;
 
-    console.log(`✏️ Actualizando álbum con ID: ${id}`);
+    if (newData.type) {
+      return res.status(400).json({
+        data: { message: "No se puede actualizar el tipo de álbum" },
+      });
+    }
+
+    if (newData.artistId) {
+      return res.status(400).json({
+        data: { message: "No se puede actualizar el artista del álbum" },
+      });
+    }
+
+    const updateData = buildAlbumUpdateData(newData);
+
+    if (Object.keys(updateData).length === 0) {
+      return res.status(400).json({
+        data: { message: "No hay campos válidos para actualizar" },
+      });
+    }
 
     // 💾 Actualizar el álbum
-    const updatedAlbum = await Album.findByIdAndUpdate(id, newData, {
+    const updatedAlbum = await Album.findByIdAndUpdate(id, updateData, {
       new: true,
     });
 

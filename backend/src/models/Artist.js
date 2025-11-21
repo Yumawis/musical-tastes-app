@@ -12,6 +12,7 @@ const artistSchema = new mongoose.Schema(
     },
     genre: {
       type: String,
+      trim: true,
       enum: {
         values: ["Electronic", "K-pop", "Rock & Roll", "Hip Hop", "Pop", "Rock"],
         message: "{VALUE} no es un género válido",

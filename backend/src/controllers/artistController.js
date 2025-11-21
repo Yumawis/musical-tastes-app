@@ -1,12 +1,13 @@
 const Artist = require("../models/Artist");
 
-const { validateArtistData } = require("../validators/artistValidator");
+const { validateArtistCreate } = require("../validators/artistCreateValidator");
+const { validateArtistUpdate, buildArtistUpdateData } = require("../builders/artistBuilder");
 
 // 👉 Crear artista
 const createArtist = async (req, res) => {
   try {
     // 🔹 Validar datos
-    const validationError = validateArtistData(req.body);
+    const validationError = validateArtistCreate(req.body);
 
     if (validationError) {
       return res.status(400).json({
@@ -132,25 +133,50 @@ const getArtistById = async (req, res) => {
 const updateArtist = async (req, res) => {
   try {
     const { id } = req.params;
-
     const newData = req.body;
-    const { name } = newData;
 
-    console.log(`✏️ Actualizando artista con ID: ${id}`);
+    console.log(`🔍 Buscando artista con ID: ${id}`);
 
-    // 🔹 Verificar duplicado (si el nombre cambia)
-    const existingArtist = await Artist.findOne({ name });
+    const artist = await Artist.findById(id);
 
-    if (existingArtist && existingArtist._id !== id) {
-      return res.status(422).json({
-        data: {
-          message: "Ya existe otro artista con ese nombre",
-        },
+    if (!artist) {
+      return res.status(400).json({
+        data: { message: "Artista no encontrado" },
       });
     }
 
+    if (newData.genre) {
+      return res.status(400).json({
+        data: { message: "No puedes actualizar el género del artista" },
+      });
+    }
+
+    const updateData = buildArtistUpdateData(newData);
+
+    // Si no hay nada válido para actualizar
+    if (Object.keys(updateData).length === 0) {
+      return res.status(400).json({
+        data: { message: "No hay campos válidos para actualizar" },
+      });
+    }
+
+    const currentArtistName = updateData.name;
+
+    if (currentArtistName) {
+      // 🔹 Verificar duplicado (si el nombre cambia)
+      const existingArtist = await Artist.findOne({ name: currentArtistName });
+
+      if (existingArtist && existingArtist._id.toString() !== id) {
+        return res.status(422).json({
+          data: {
+            message: "Ya existe un artista con ese nombre",
+          },
+        });
+      }
+    }
+
     // 🔹 Actualizar datos
-    const updatedArtist = await Artist.findByIdAndUpdate(id, newData, { new: true });
+    const updatedArtist = await Artist.findByIdAndUpdate(id, updateData, { new: true });
 
     console.log("✅ Artista actualizado:", updatedArtist);
 

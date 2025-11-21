@@ -1,4 +1,5 @@
 const Artist = require("../models/Artist");
+const Album = require("../models/Album");
 const Song = require("../models/Song");
 
 const { validateSong } = require("../validators/songValidator");
@@ -25,35 +26,71 @@ const createSong = async (req, res) => {
       });
     }
 
-    // 🔎 Verificar que el artista exista
-    const existingArtist = await Artist.findById(artistId);
+    let currentArtistId = null;
+    let currentReleaseDate = null;
 
-    if (!existingArtist) {
-      return res.status(404).json({
-        data: { message: "El artista enviado no existe" },
-      });
+    if (artistId) {
+      // 🔎 Verificar que el artista exista
+      const existingArtist = await Artist.findById(artistId);
+
+      if (!existingArtist) {
+        return res.status(404).json({
+          data: { message: "El artista enviado no existe" },
+        });
+      }
+
+      currentArtistId = artistId;
+      currentReleaseDate = releaseDate;
+
+      // 🔍 Verificar duplicados por artista y título
+      const existingSong = await Song.findOne({ artistId, title });
+
+      if (existingSong) {
+        return res.status(422).json({
+          data: {
+            message: "Ya existe una canción con ese título para este artista",
+          },
+        });
+      }
     }
 
-    // 🔍 Verificar duplicados por artista y título
-    const existingSong = await Song.findOne({ artistId, title });
+    if (albumId) {
+      // 🔎 Verificar que el album exista
+      const existingAlbum = await Album.findById(albumId);
 
-    if (existingSong) {
-      return res.status(422).json({
-        data: {
-          message: "Ya existe una canción con ese título para este artista",
-        },
-      });
+      if (!existingAlbum) {
+        return res.status(404).json({
+          data: { message: "El álbum enviado no existe" },
+        });
+      }
+
+      currentArtistId = existingAlbum.artistId;
+      currentReleaseDate = existingAlbum.releaseDate;
+
+      // 🔍 Verificar duplicados dentro del álbum
+      const existingSong = await Song.findOne({ albumId, title });
+
+      if (existingSong) {
+        return res.status(422).json({
+          data: {
+            message: "Ya existe una canción con ese título en este álbum",
+          },
+        });
+      }
     }
+
+    const newSongData = {
+      title,
+      artistId: currentArtistId,
+      releaseDate: currentReleaseDate,
+      duration,
+      type,
+    };
+
+    if (albumId) newSongData.albumId = albumId;
 
     // 💾 Crear nueva canción
-    const newSong = new Song({
-      title,
-      artistId,
-      releaseDate,
-      duration,
-      albumId,
-      type,
-    });
+    const newSong = new Song(newSongData);
 
     const savedSong = await newSong.save();
 
