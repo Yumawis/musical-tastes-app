@@ -3,6 +3,8 @@ const Album = require("../models/Album");
 const Song = require("../models/Song");
 
 const { validateSong } = require("../validators/songValidator");
+const { buildSongUpdateData } = require("../builders/songBuilder");
+const { normalizeId } = require("../utilities/normalize");
 
 // 👉 Crear canción
 const createSong = async (req, res) => {
@@ -197,22 +199,42 @@ const updateSong = async (req, res) => {
   try {
     const { id } = req.params;
 
-    const newData = req.body;
+    const currentSong = await Song.findById(id);
 
-    console.log(`✏️ Actualizando canción con ID: ${id}`);
-
-    // 🔹 Intentar actualizar la canción
-    const updatedSong = await Song.findByIdAndUpdate(id, newData, {
-      new: true,
-    });
-
-    if (!updatedSong) {
+    if (!currentSong) {
       return res.status(404).json({
         data: { message: "Canción no encontrada" },
       });
     }
 
-    console.log(`✏️ Canción ${id} actualizada correctamente`);
+    const newData = req.body;
+
+    const currentAlbumId = normalizeId(newData?.albumId);
+
+    if (currentAlbumId && currentAlbumId !== currentSong?.albumId) {
+      return res.status(400).json({
+        data: { message: "No puedes editar una canción que pertenece a un álbum diferente" },
+      });
+    }
+
+    if (currentAlbumId && !currentSong?.albumId) {
+      return res.status(400).json({
+        data: { message: "No puedes asignar un álbum a un sencillo" },
+      });
+    }
+
+    const updateSong = buildSongUpdateData(currentSong, newData);
+
+    // Si no hay nada válido para actualizar
+    if (Object.keys(updateSong).length === 0) {
+      return res.status(400).json({
+        data: { message: "No hay campos válidos para actualizar" },
+      });
+    }
+
+    const updatedSong = await Song.findByIdAndUpdate(id, updateSong, { new: true });
+
+    console.log("✏️ Canción actualizada:", updatedSong);
 
     const response = {
       data: {

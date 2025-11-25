@@ -1,6 +1,7 @@
 const User = require("../models/User");
 
 const { validateSignUp } = require("../validators/authValidator");
+const { existingEmail } = require("../helpers/queryValidators");
 
 // 👉 Registrar usuario
 const signUp = async (req, res) => {
@@ -17,15 +18,7 @@ const signUp = async (req, res) => {
       });
     }
 
-    const existingUserEmail = await User.findOne({ email });
-
-    if (existingUserEmail) {
-      return res.status(400).json({
-        data: {
-          message: "El email ya está registrado",
-        },
-      });
-    }
+    await existingEmail(email);
 
     const newUser = new User({
       names,
@@ -121,6 +114,8 @@ const login = async (req, res) => {
     return res.status(422).json(response);
   }
 };
+
+//change password
 
 module.exports = {
   signUp,

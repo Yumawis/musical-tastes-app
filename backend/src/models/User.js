@@ -19,7 +19,7 @@ userSchema.pre("save", async function (next) {
   if (!this.isModified("password")) return next(); // Solo si fue cambiada
 
   try {
-    const salt = await bcrypt.genSalt(5);
+    const salt = await bcrypt.genSalt(10);
     this.password = await bcrypt.hash(this.password, salt);
 
     next(); // continúa el flujo normal
@@ -33,6 +33,7 @@ userSchema.methods.checkPassword = async function (currentPassword) {
   return await bcrypt.compare(currentPassword, this.password);
 };
 
+// Middleware para eliminar listas de favoritos al eliminar un usuario
 userSchema.pre("deleteOne", { document: true }, async function (next) {
   try {
     const userId = this._id;

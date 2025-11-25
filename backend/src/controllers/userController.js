@@ -1,3 +1,4 @@
+const { buildUserUpdateData } = require("../builders/userBuilder");
 const User = require("../models/User");
 
 // 👉 Obtener todos los usuarios
@@ -74,9 +75,31 @@ const getUserById = async (req, res) => {
 const updateUser = async (req, res) => {
   try {
     const { id } = req.params;
+
+    const user = await User.findById(id);
+
+    if (!user) {
+      return res.status(400).json({
+        data: { message: "Usuario no encontrado" },
+      });
+    }
+
     const newData = req.body;
 
-    const updatedUser = await User.findByIdAndUpdate(id, newData, { new: true });
+    await existingEmail(email);
+
+    const updateData = buildUserUpdateData(newData);
+
+    // Si no hay nada válido para actualizar
+    if (Object.keys(updateData).length === 0) {
+      return res.status(400).json({
+        data: { message: "No hay campos válidos para actualizar" },
+      });
+    }
+
+    const updatedUser = await User.findByIdAndUpdate(id, updateData, { new: true });
+
+    console.log("✅ Usuario actualizado:", updatedUser);
 
     const response = {
       data: {
