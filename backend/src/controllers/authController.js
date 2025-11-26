@@ -1,6 +1,9 @@
 const User = require("../models/User");
 
-const { validateSignUp } = require("../validators/authValidator");
+const { validateSignUp, validateNewPassword } = require("../validators/authValidator");
+
+const { encriptedPassword, checkPassword } = require("../middleware/authMiddleware");
+
 const { existingEmail } = require("../helpers/queryValidators");
 
 // 👉 Registrar usuario
@@ -74,10 +77,12 @@ const login = async (req, res) => {
     }
 
     console.log("user:", user, password);
-    // 2️⃣ Verificar la contraseña usando bcrypt
-    const isMatch = await user.checkPassword(password);
 
-    if (!isMatch) {
+    const hashedPassword = user.password;
+
+    const isMatchPassword = await checkPassword(password, hashedPassword);
+
+    if (!isMatchPassword) {
       return res.status(400).json({
         data: {
           message: "Contraseña incorrecta",
@@ -115,9 +120,77 @@ const login = async (req, res) => {
   }
 };
 
-//change password
+//Actualizar contraseña
+const changePassword = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const user = await User.findById(id);
+
+    if (!user) {
+      return res.status(400).json({
+        data: { message: "Usuario no encontrado" },
+      });
+    }
+
+    const { currentPassword, newPassword } = req.body;
+
+    const validationError = validateNewPassword({ currentPassword, newPassword });
+
+    if (validationError) {
+      return res.status(400).json({
+        data: { message: validationError },
+      });
+    }
+
+    const hashedPassword = user.password;
+
+    const isMatchPassword = await checkPassword(currentPassword, hashedPassword);
+
+    if (!isMatchPassword) {
+      return res.status(400).json({
+        data: { message: "La contraseña anterior no coincide con la ingresada" },
+      });
+    }
+
+    const encriptedNewPassword = await encriptedPassword(newPassword);
+
+    const userData = {};
+
+    if (encriptedNewPassword) userData.password = encriptedNewPassword;
+
+    const updatedNewPassword = await User.findByIdAndUpdate(id, userData, {
+      new: true,
+    });
+
+    console.log("✏️ Contraseña actualizada:", updatedNewPassword);
+
+    const response = {
+      data: {
+        message: "Contraseña actualizada correctamente",
+        result: updatedNewPassword,
+      },
+    };
+
+    return res.status(200).json(response);
+  } catch (error) {
+    const errorMessage = error.message;
+
+    console.error("❌ Error cambiando contraseña", errorMessage);
+
+    const response = {
+      data: {
+        message: "Ocurrió un error al cambiar la contraseña",
+        error: errorMessage,
+      },
+    };
+
+    return res.status(422).json(response);
+  }
+};
 
 module.exports = {
   signUp,
   login,
+  changePassword,
 };

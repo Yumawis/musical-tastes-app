@@ -9,9 +9,16 @@ const validateSignUp = ({ names, lastNames, email, password }) => {
 
   if (!VALIDATE_EMAIL.test(email)) return "Formato de email inválido";
 
-  if (!password) return "La contraseña es obligatoria";
+  if (!password) return "La variable password es requerida";
 
-  if (password.length < 6) return "La contraseña debe tener al menos 6 caracteres";
+  if (password.length < 6) return "La variable password debe tener al menos 6 caracteres";
 };
 
-module.exports = { validateSignUp };
+const validateNewPassword = ({ currentPassword, newPassword }) => {
+  if (!currentPassword) return "La variable currentPassword es requerida";
+
+  if (!newPassword) return "La variable newPassword es requerida";
+
+  if (newPassword.length < 6) return "La variable password debe tener al menos 6 caracteres";
+};
+module.exports = { validateSignUp, validateNewPassword };

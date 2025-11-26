@@ -132,12 +132,13 @@ const deleteUser = async (req, res) => {
 
     const user = await User.findById(id);
 
-    if (!user)
+    if (!user) {
       return res.status(404).json({
         data: {
           message: "El usuario no existe o ya fue eliminado",
         },
       });
+    }
 
     await user.deleteOne();
 

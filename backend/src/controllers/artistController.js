@@ -11,9 +11,7 @@ const createArtist = async (req, res) => {
 
     if (validationError) {
       return res.status(400).json({
-        data: {
-          message: validationError,
-        },
+        data: { message: validationError },
       });
     }
 
