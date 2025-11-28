@@ -4,8 +4,6 @@ const { validateSignUp, validateNewPassword } = require("../validators/authValid
 
 const { encriptedPassword, checkPassword } = require("../middleware/authMiddleware");
 
-const { existingEmail } = require("../helpers/queryValidators");
-
 // 👉 Registrar usuario
 const signUp = async (req, res) => {
   try {
@@ -21,7 +19,15 @@ const signUp = async (req, res) => {
       });
     }
 
-    await existingEmail(email);
+    const existingUser = await User.findOne({ email });
+
+    if (!!existingUser) {
+      return res.status(400).json({
+        data: {
+          message: "El email ya está registrado",
+        },
+      });
+    }
 
     const newUser = new User({
       names,

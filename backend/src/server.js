@@ -11,6 +11,7 @@ const userRoutes = require("./routes/userRoutes");
 const artistRoutes = require("./routes/artistRoutes");
 const albumRoutes = require("./routes/albumRoutes");
 const songRoutes = require("./routes/songRoutes");
+const favoriteRouter = require("./routes/favoriteRoutes");
 
 // 🏗️ Initialize the Express application
 const app = express();
@@ -36,6 +37,7 @@ app.use(`${prefix}/user`, userRoutes);
 app.use(`${prefix}/artist`, artistRoutes);
 app.use(`${prefix}/album`, albumRoutes);
 app.use(`${prefix}/song`, songRoutes);
+app.use(`${prefix}/favorite`, favoriteRouter);
 
 // ⚙️ Start the server
 app.listen(process.env.PORT, () => {

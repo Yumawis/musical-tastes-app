@@ -1,5 +1,6 @@
-const { buildUserUpdateData } = require("../builders/userBuilder");
 const User = require("../models/User");
+
+const { buildUserUpdateData } = require("../builders/userBuilder");
 
 // 👉 Obtener todos los usuarios
 const getAllUsers = async (req, res) => {
@@ -54,7 +55,7 @@ const getUserById = async (req, res) => {
       },
     };
 
-    res.status(200).json(response);
+    return res.status(200).json(response);
   } catch (error) {
     const errorMessage = error.message;
 
@@ -85,8 +86,17 @@ const updateUser = async (req, res) => {
     }
 
     const newData = req.body;
+    const { email } = newData;
 
-    await existingEmail(email);
+    const existingUser = await User.findOne({ email });
+
+    if (!!existingUser) {
+      return res.status(400).json({
+        data: {
+          message: "El email ya está registrado",
+        },
+      });
+    }
 
     const updateData = buildUserUpdateData(newData);
 
@@ -108,7 +118,7 @@ const updateUser = async (req, res) => {
       },
     };
 
-    res.status(200).json(response);
+    return res.status(200).json(response);
   } catch (error) {
     const errorMessage = error.message;
 
@@ -121,7 +131,7 @@ const updateUser = async (req, res) => {
       },
     };
 
-    res.status(422).json(response);
+    return res.status(422).json(response);
   }
 };
 
@@ -150,7 +160,7 @@ const deleteUser = async (req, res) => {
       },
     };
 
-    res.status(200).json(response);
+    return res.status(200).json(response);
   } catch (error) {
     const errorMessage = error.message;
 

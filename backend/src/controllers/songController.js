@@ -48,7 +48,7 @@ const createSong = async (req, res) => {
       const existingSong = await Song.findOne({ artistId, title });
 
       if (existingSong) {
-        return res.status(422).json({
+        return res.status(400).json({
           data: {
             message: "Ya existe una canción con ese título para este artista",
           },
