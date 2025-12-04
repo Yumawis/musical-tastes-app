@@ -15,7 +15,7 @@ const {
 router.put("/album/:userId", addFavoriteAlbum);
 
 // 👉 Añadir canción favorita
-router.put("/song/:id", addFavoriteSong);
+router.put("/song/:userId", addFavoriteSong);
 
 // 👉 Obtener todos los favoritos por usuario
 router.get("/:id", getAllFavorites);

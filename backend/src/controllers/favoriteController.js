@@ -169,9 +169,11 @@ const getAllFavorites = async (req, res) => {
 
     const favoriteAlbums = await FavoriteAlbum.findOne({ userId: id }).populate({
       path: "albums",
+      select: "_id title image",
       populate: {
         path: "tracklist",
         model: "Song",
+        select: "_id title",
       },
     });
 
@@ -214,7 +216,15 @@ const getAlbumFavorite = async (req, res) => {
       });
     }
 
-    const albums = await FavoriteAlbum.find({ userId: id });
+    const albums = await FavoriteAlbum.find({ userId: id }).populate({
+      path: "albums",
+      select: "_id title image",
+      populate: {
+        path: "tracklist",
+        model: "Song",
+        select: "_id title",
+      },
+    });
 
     console.log("✅ Lista de álbumes favoritos encontrados:", albums.length);
 
