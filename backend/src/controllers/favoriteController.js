@@ -154,57 +154,8 @@ const addFavoriteSong = async (req, res) => {
   }
 };
 
-// 👉 Obtener todos los favoritos por usuario
-const getAllFavorites = async (req, res) => {
-  try {
-    const { id } = req.params;
-
-    const user = await User.findById(id);
-
-    if (!user) {
-      return res.status(400).json({
-        data: { message: "Usuario no encontrado" },
-      });
-    }
-
-    const favoriteAlbums = await FavoriteAlbum.findOne({ userId: id }).populate({
-      path: "albums",
-      select: "_id title image",
-      populate: {
-        path: "tracklist",
-        model: "Song",
-        select: "_id title",
-      },
-    });
-
-    const favoriteSongs = await FavoriteSong.findOne({ userId: id });
-
-    const response = {
-      data: {
-        message: "Lista de favoritos obtenidos correctamente",
-        result: { favoriteAlbums, favoriteSongs },
-      },
-    };
-
-    return res.status(200).json(response);
-  } catch (error) {
-    const errorMessage = error.message;
-
-    console.error("❌ Error obteniendo la lista de favoritos:", errorMessage);
-
-    const response = {
-      data: {
-        message: "Ocurrió un error al obtener la lista de favoritos",
-        error: errorMessage,
-      },
-    };
-
-    return res.status(422).json(response);
-  }
-};
-
 // 👉 Obtener los álbumes favoritos
-const getAlbumFavorite = async (req, res) => {
+const getFavoriteAlbums = async (req, res) => {
   try {
     const { id } = req.params;
 
@@ -218,12 +169,7 @@ const getAlbumFavorite = async (req, res) => {
 
     const albums = await FavoriteAlbum.find({ userId: id }).populate({
       path: "albums",
-      select: "_id title image",
-      populate: {
-        path: "tracklist",
-        model: "Song",
-        select: "_id title",
-      },
+      select: "_id title image artistId",
     });
 
     console.log("✅ Lista de álbumes favoritos encontrados:", albums.length);
@@ -255,7 +201,7 @@ const getAlbumFavorite = async (req, res) => {
 };
 
 // 👉 Obtener las canciones favoritas
-const getSongFavorite = async (req, res) => {
+const getFavoriteSongs = async (req, res) => {
   try {
     const { id } = req.params;
 
@@ -267,7 +213,10 @@ const getSongFavorite = async (req, res) => {
       });
     }
 
-    const songs = await FavoriteSong.find({ userId: id });
+    const songs = await FavoriteSong.find({ userId: id }).populate({
+      path: "songs",
+      select: "_id title artistId",
+    });
 
     console.log("✅ Lista de canciones favoritas encontradas:", songs.length);
 
@@ -303,7 +252,7 @@ const removeFavoriteAlbum = async (req, res) => {
     const { albumId } = req.params;
     const { userId } = req.body;
 
-    const validationError = validateFavoriteAlbum({ albumId });
+    const validationError = validateFavoriteAlbum({ userId, albumId });
 
     if (validationError) {
       return res.status(400).json({
@@ -374,7 +323,8 @@ const removeFavoriteAlbum = async (req, res) => {
 // 👉 Remover canción favorita
 const removeFavoriteSong = async (req, res) => {
   try {
-    const { userId, songId } = req.body;
+    const { songId } = req.params;
+    const { userId } = req.body;
 
     const validationError = validateFavoriteSong({ userId, songId });
 
@@ -447,9 +397,8 @@ const removeFavoriteSong = async (req, res) => {
 module.exports = {
   addFavoriteAlbum,
   addFavoriteSong,
-  getAllFavorites,
-  getAlbumFavorite,
-  getSongFavorite,
+  getFavoriteAlbums,
+  getFavoriteSongs,
   removeFavoriteAlbum,
   removeFavoriteSong,
 };

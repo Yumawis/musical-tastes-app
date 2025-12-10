@@ -14,7 +14,8 @@ const validateAlbum = ({ artistId, title, releaseDate, type }) => {
 };
 
 const validateFavoriteAlbum = ({ userId, albumId }) => {
-  if (!mongoose.Types.ObjectId.isValid(userId)) return "El parámetro userId es inválido";
+  if (!userId || !mongoose.Types.ObjectId.isValid(userId))
+    return "La variable userId es requerida para remover un álbum de favoritos";
 
   if (!albumId || !mongoose.Types.ObjectId.isValid(albumId))
     return "La variable albumId es requerida";

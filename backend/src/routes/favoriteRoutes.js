@@ -4,9 +4,8 @@ const router = express.Router();
 const {
   addFavoriteAlbum,
   addFavoriteSong,
-  getAllFavorites,
-  getSongFavorite,
-  getAlbumFavorite,
+  getFavoriteAlbums,
+  getFavoriteSongs,
   removeFavoriteAlbum,
   removeFavoriteSong,
 } = require("../controllers/favoriteController");
@@ -17,14 +16,11 @@ router.put("/album/:userId", addFavoriteAlbum);
 // 👉 Añadir canción favorita
 router.put("/song/:userId", addFavoriteSong);
 
-// 👉 Obtener todos los favoritos por usuario
-router.get("/:id", getAllFavorites);
-
 // 👉 Obtener todos los álbumes favoritos por usuario
-router.get("/album/:id", getAlbumFavorite);
+router.get("/album/:id", getFavoriteAlbums);
 
 // 👉 Obtener todos las canciones favoritas por usuario
-router.get("/song/:id", getSongFavorite);
+router.get("/song/:id", getFavoriteSongs);
 
 // 👉 Eliminar álbum favorito
 router.delete("/album/:albumId", removeFavoriteAlbum);

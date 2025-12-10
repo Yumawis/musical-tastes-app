@@ -53,7 +53,8 @@ const validateSong = (data) => {
 };
 
 const validateFavoriteSong = ({ userId, songId }) => {
-  if (!mongoose.Types.ObjectId.isValid(userId)) return "El parámetro userId es inválido";
+  if (!userId || !mongoose.Types.ObjectId.isValid(userId))
+    return "La variable userId es requerida para remover una canción de favoritos";
 
   if (!songId || !mongoose.Types.ObjectId.isValid(songId)) return "La variable songId es requerida";
 };
