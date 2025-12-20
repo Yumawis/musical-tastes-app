@@ -2,6 +2,8 @@
 // const { appConfig } = require('./config/app.config.js') // 👈 Import centralized configuration
 require("dotenv").config();
 
+const { appConfig } = require("./config/app.config");
+
 const express = require("express");
 const cors = require("cors");
 const connectDB = require("./config/db");
