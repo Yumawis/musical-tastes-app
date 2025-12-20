@@ -16,11 +16,14 @@ const favoriteRouter = require("./routes/favoriteRoutes");
 // 🏗️ Initialize the Express application
 const app = express();
 
+const ALLOWED_CORS = appConfig.allowedCORS;
+const PORT = appConfig.port;
+
 // 🧩 Global Middlewares
 app.use(
   cors({
     // origin: appConfig.allowedCORS, // 👈 Allowed domains from app.config.json
-    origin: process.env.ALLOWED_CORS, // 👈 Allowed domains from app.config.json
+    origin: ALLOWED_CORS, // 👈 Allowed domains from app.config.json
     credentials: true, // 👈 Allows sending of cookies or personalized headers
   })
 );
@@ -40,10 +43,10 @@ app.use(`${prefix}/song`, songRoutes);
 app.use(`${prefix}/favorite`, favoriteRouter);
 
 // ⚙️ Start the server
-app.listen(process.env.PORT, () => {
+app.listen(PORT, () => {
   console.log("=======================================================");
   console.log("🟢 Servidor iniciado correctamente");
-  console.log(`🌐 URL base: http://localhost:${process.env.PORT}`);
+  console.log(`🌐 URL base: http://localhost:${PORT}`);
   console.log("⚙️ Configuración:");
-  console.log(`     - CORS permitido: ${process.env.ALLOWED_CORS}`);
+  console.log(`     - CORS permitido: ${ALLOWED_CORS}`);
 });
