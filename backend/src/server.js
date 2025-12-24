@@ -1,0 +1,54 @@
+// 🚀 Configuration server.js
+// const { appConfig } = require('./config/app.config.js') // 👈 Import centralized configuration
+require("dotenv").config();
+
+const { appConfig } = require("./config/app.config");
+
+const express = require("express");
+const cors = require("cors");
+const connectDB = require("./config/db");
+
+const authRoutes = require("./routes/authRoutes");
+const userRoutes = require("./routes/userRoutes");
+const artistRoutes = require("./routes/artistRoutes");
+const albumRoutes = require("./routes/albumRoutes");
+const songRoutes = require("./routes/songRoutes");
+const favoriteRouter = require("./routes/favoriteRoutes");
+
+// 🏗️ Initialize the Express application
+const app = express();
+
+const ALLOWED_CORS = appConfig.allowedCORS;
+const PORT = appConfig.port;
+
+// 🧩 Global Middlewares
+app.use(
+  cors({
+    // origin: appConfig.allowedCORS, // 👈 Allowed domains from app.config.json
+    origin: ALLOWED_CORS, // 👈 Allowed domains from app.config.json
+    credentials: true, // 👈 Allows sending of cookies or personalized headers
+  })
+);
+
+app.use(express.json()); // 📦 Allows receiving JSON in requests
+
+connectDB();
+
+const prefix = "/api/v1/musical-tastes";
+
+// 🛣️ Main Routes
+app.use(`${prefix}/auth`, authRoutes);
+app.use(`${prefix}/user`, userRoutes);
+app.use(`${prefix}/artist`, artistRoutes);
+app.use(`${prefix}/album`, albumRoutes);
+app.use(`${prefix}/song`, songRoutes);
+app.use(`${prefix}/favorite`, favoriteRouter);
+
+// ⚙️ Start the server
+app.listen(PORT, () => {
+  console.log("=======================================================");
+  console.log("🟢 Servidor iniciado correctamente");
+  console.log(`🌐 URL base: http://localhost:${PORT}`);
+  console.log("⚙️ Configuración:");
+  console.log(`     - CORS permitido: ${ALLOWED_CORS}`);
+});
