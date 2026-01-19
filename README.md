@@ -26,12 +26,12 @@ cd musical-tastes-app
 ### 2️⃣ Instala las dependencias
 ```bash
 cd backend
-npm install
+pnpm install
 ```
 
 ### 3️⃣ Ejecuta el backend
 ```bash
-npm run dev
+pnpm dev
 ```
 Esto levantará el servidor Express en el puerto configurado (por defecto 5000).
 
