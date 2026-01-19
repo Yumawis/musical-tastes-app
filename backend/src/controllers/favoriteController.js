@@ -3,7 +3,7 @@ const Song = require("../models/Song");
 const User = require("../models/User");
 
 const FavoriteAlbum = require("../models/FavoriteAlbum");
-const FavoriteSong = require("../models/FavoriteSong");
+const FavoriteSong = require("../models/FavoriteMusic");
 
 const { validateFavoriteAlbum } = require("../validators/albumValidator");
 const { validateFavoriteSong } = require("../validators/songValidator");

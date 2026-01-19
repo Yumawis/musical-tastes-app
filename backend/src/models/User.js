@@ -1,6 +1,6 @@
 const mongoose = require("mongoose");
 
-const FavoriteSong = require("../models/FavoriteSong");
+const FavoriteSong = require("./FavoriteMusic");
 const FavoriteAlbum = require("../models/FavoriteAlbum");
 
 const { encriptedPassword } = require("../middleware/authMiddleware");
